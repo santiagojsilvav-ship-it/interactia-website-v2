@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080B1A" />
+  <title>InteractIA — Sistemas de IA que trabajan mientras tú no estás</title>
+  <meta name="description" content="Automatización de atención al cliente por WhatsApp, procesos internos y páginas web a la medida. Sistemas de inteligencia artificial para que tu negocio funcione sin depender de ti." />
+
+  <!-- Fuentes: Space Grotesk (headings) + Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Poster del hero -->
+  <link rel="preload" as="image" href="assets/hero-poster.jpg" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#080B1A',
+            electric: '#3D6FFF',
+            body: '#CBD5E1',
+            muted: '#7C87A0',
+          },
+          fontFamily: {
+            heading: ['"Space Grotesk"', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Íconos Lucide -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="bg-navy text-body antialiased">
+
+  <!-- ============ CAMINO DE LUZ (capa detrás del contenido) ============ -->
+  <div id="light-layer" aria-hidden="true">
+    <svg id="light-svg" xmlns="http://www.w3.org/2000/svg">
+      <path class="trail-halo" d="" />
+      <path class="trail-mid" d="" />
+      <path class="trail-core" d="" />
+    </svg>
+    <div id="comet"></div>
+  </div>
+
+  <div class="ambient-top" aria-hidden="true"></div>
+
+  <!-- ============ NAV ============ -->
+  <header id="nav" class="fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between">
+      <a href="#" class="font-heading font-bold text-white text-lg tracking-tight">
+        Interact<span class="text-electric">IA</span>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-8 text-sm">
+        <a href="#servicios" class="nav-link">Servicios</a>
+        <a href="#como-trabajo" class="nav-link">Cómo trabajo</a>
+        <a href="#stack" class="nav-link">Stack</a>
+        <a href="#para-quien" class="nav-link">Para quién</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="https://cal.com/santiago-silva-lvftf3/30min" target="_blank" rel="noopener"
+           class="magnetic btn-primary btn-sm hidden md:inline-flex">
+          <div class="points_wrapper" aria-hidden="true">
+            <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+            <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+          </div>
+          <span class="btn-label">Habla conmigo
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+
+        <!-- Hamburguesa -->
+        <button id="burger" class="burger md:hidden relative z-[70] w-10 h-10 flex flex-col items-center justify-center gap-[5px]"
+                aria-label="Abrir menú">
+          <span class="burger-line block w-5 h-[1.5px] bg-white"></span>
+          <span class="burger-line block w-5 h-[1.5px] bg-white"></span>
+          <span class="burger-line block w-5 h-[1.5px] bg-white"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Menú móvil -->
+  <div id="mobile-menu" class="md:hidden">
+    <div class="h-full flex flex-col items-center justify-center gap-7 px-8">
+      <a href="#servicios" class="menu-item font-heading text-2xl text-white">Servicios</a>
+      <a href="#como-trabajo" class="menu-item font-heading text-2xl text-white">Cómo trabajo</a>
+      <a href="#stack" class="menu-item font-heading text-2xl text-white">Stack</a>
+      <a href="#para-quien" class="menu-item font-heading text-2xl text-white">Para quién</a>
+      <a href="#faq" class="menu-item font-heading text-2xl text-white">FAQ</a>
+      <a href="https://cal.com/santiago-silva-lvftf3/30min" target="_blank" rel="noopener"
+         class="menu-item btn-primary mt-4">
+        <div class="points_wrapper" aria-hidden="true">
+          <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+          <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+        </div>
+        <span class="btn-label">Habla conmigo
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+
+  <main class="relative z-[2]">
+
+    <!-- ============ HERO ============ -->
+    <section class="relative pt-[100px] lg:pt-[132px] pb-16 lg:pb-28 overflow-hidden">
+      <!-- Capa 1: ciudad futurista de fondo. Capa 2: overlay oscurecedor
+           (izquierda muy oscura para el texto, derecha más abierta para
+           el anillo) + fade inferior hacia el navy plano. -->
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-overlay" aria-hidden="true"></div>
+      <div class="relative z-[1] max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="flex flex-col lg:flex-row items-center gap-6 lg:gap-10">
+
+          <!-- Imagen: arriba en móvil, derecha en desktop -->
+          <div class="ring-stage relative w-full lg:w-[55%] order-first lg:order-last reveal">
+            <div class="ring-glow" aria-hidden="true"></div>
+            <!-- Video con el fondo forzado a #080B1A en la codificación
+                 (lutrgb + BT.709 etiquetado): invisible por construcción,
+                 sin parches CSS. Sin atributo loop: el bucle es ping-pong
+                 por JS (adelante-atrás) para que nunca haya salto. -->
+            <video id="hero-video"
+                   class="ring-img max-h-[46vh] lg:max-h-none object-contain mx-auto"
+                   width="1280" height="716"
+                   autoplay muted playsinline preload="metadata"
+                   poster="assets/hero-poster.jpg" aria-hidden="true">
+              <source src="assets/hero-mobile.mp4" media="(max-width: 767px)" type="video/mp4" />
+              <source src="assets/hero-hd.mp4" type="video/mp4" />
+            </video>
+          </div>
+
+          <!-- Texto -->
+          <div class="w-full lg:w-[45%] text-center lg:text-left" data-stagger="0.1">
+            <div class="glass-pill reveal inline-flex items-center gap-2 text-[12px] tracking-[0.18em] uppercase text-muted border border-white/10 rounded-full px-4 py-1.5 mb-6">
+              <span class="w-1.5 h-1.5 rounded-full bg-electric"></span>
+              IA · Automatización · Sistemas a la medida
+            </div>
+
+            <h1 class="reveal font-heading font-bold text-white text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.08] tracking-tight">
+              Sistemas de <span class="text-electric">IA</span> que trabajan mientras tú no
+              <span class="tw-wrap"><span id="typewriter">estás</span><span class="tw-cursor" aria-hidden="true">|</span></span>
+            </h1>
+
+            <p class="reveal text-muted text-base sm:text-lg leading-relaxed mt-5 max-w-xl mx-auto lg:mx-0">
+              Desde la atención al cliente por WhatsApp hasta procesos internos y páginas web.
+              Diseño sistemas de inteligencia artificial para que tu negocio funcione sin depender de ti.
+            </p>
+
+            <div class="reveal mt-8">
+              <a href="https://cal.com/santiago-silva-lvftf3/30min" target="_blank" rel="noopener"
+                 class="magnetic btn-primary">
+                <div class="points_wrapper" aria-hidden="true">
+                  <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+                  <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+                </div>
+                <span class="btn-label">Habla conmigo
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </span>
+              </a>
+            </div>
+
+            <div class="reveal flex flex-wrap justify-center lg:justify-start gap-2.5 mt-8">
+              <span class="hero-pill"><i data-lucide="bot"></i>Agente IA</span>
+              <span class="hero-pill"><i data-lucide="workflow"></i>Automatización</span>
+              <span class="hero-pill"><i data-lucide="globe"></i>Páginas Web</span>
+              <span class="hero-pill"><i data-lucide="database"></i>CRM</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ QUÉ AUTOMATIZO ============ -->
+    <section id="servicios" data-light-stop data-lit class="relative py-20 lg:py-32">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="max-w-2xl" data-stagger="0.1">
+          <h2 class="reveal font-heading font-bold text-white text-3xl sm:text-4xl tracking-tight">
+            Lo que puedo hacer por tu negocio
+          </h2>
+          <p class="reveal text-muted text-base sm:text-lg mt-4">
+            Cada sistema es a la medida. Estos son los tres tipos de proyecto que más impacto generan.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-12" data-stagger="0.12">
+
+          <!-- Tarjeta 1: WhatsApp (grande, con mockup) -->
+          <article class="reveal glow-card lg:col-span-2 p-7 sm:p-10">
+            <div class="flex flex-col md:flex-row gap-8 md:gap-12 items-center">
+              <div class="flex-1">
+                <span class="card-icon"><i data-lucide="message-circle"></i></span>
+                <h3 class="font-heading font-semibold text-white text-xl sm:text-2xl mt-5">
+                  Atención al cliente por WhatsApp
+                </h3>
+                <p class="text-muted leading-relaxed mt-3 text-[15px]">
+                  Un agente de IA atiende, entiende y responde por ti. Cada conversación queda
+                  organizada por etapa (nuevo cliente, interesado, pendiente de respuesta, listo
+                  para cerrar), y tú ves de un vistazo qué chats necesitan tu atención y cuáles ya
+                  están resueltos. El agente trabaja 24/7 y solo te pasa al humano cuando de verdad
+                  hace falta.
+                </p>
+                <div class="flex flex-wrap gap-2 mt-6">
+                  <span class="stage-chip"><span class="dot"></span>Nuevo cliente</span>
+                  <span class="stage-chip"><span class="dot"></span>Interesado</span>
+                  <span class="stage-chip"><span class="dot"></span>Atención inmediata</span>
+                </div>
+              </div>
+
+              <!-- Mockup de teléfono (CSS puro) -->
+              <div class="shrink-0">
+                <div class="phone">
+                  <div class="phone-notch"></div>
+                  <div class="phone-header">
+                    <div class="phone-avatar">IA</div>
+                    <div>
+                      <div class="text-[11px] text-white font-medium leading-tight">InteractIA</div>
+                      <div class="text-[9px] text-electric leading-tight">en línea · responde 24/7</div>
+                    </div>
+                  </div>
+                  <div class="phone-body">
+                    <div class="bubble in">Hola, ¿tienen disponibilidad para esta semana?</div>
+                    <div class="bubble out">¡Hola! Sí, tenemos cupos el jueves y el viernes. ¿Qué día te queda mejor?</div>
+                    <div class="bubble in">El jueves en la tarde</div>
+                    <div class="bubble out">Perfecto, te agendo el jueves a las 3:00 pm. Te llega la confirmación por aquí mismo.</div>
+                    <span class="bubble-tag">→ Movido a: Atención inmediata</span>
+                    <div class="typing"><span></span><span></span><span></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Tarjeta 2: Procesos internos -->
+          <article class="reveal glow-card p-7 sm:p-9">
+            <span class="card-icon"><i data-lucide="settings"></i></span>
+            <h3 class="font-heading font-semibold text-white text-xl mt-5">
+              Automatización de procesos internos
+            </h3>
+            <p class="text-muted leading-relaxed mt-3 text-[15px]">
+              Todo lo que hoy haces manual y te consume horas: emails, calendarios, notificaciones,
+              seguimientos, cargas de datos entre plataformas. Lo diseño para que se ejecute solo,
+              con la lógica de tu negocio.
+            </p>
+          </article>
+
+          <!-- Tarjeta 3: Páginas web -->
+          <article class="reveal glow-card p-7 sm:p-9">
+            <span class="card-icon"><i data-lucide="globe"></i></span>
+            <h3 class="font-heading font-semibold text-white text-xl mt-5">
+              Páginas web y sistemas a la medida
+            </h3>
+            <p class="text-muted leading-relaxed mt-3 text-[15px]">
+              Sitios rápidos, modernos y pensados para convertir. Con integraciones a los sistemas
+              de tu negocio y automatizaciones detrás para que tu página no solo se vea bien, sino
+              que trabaje por ti.
+            </p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CÓMO TRABAJO ============ -->
+    <section id="como-trabajo" data-light-stop data-lit class="relative py-20 lg:py-32">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="max-w-2xl" data-stagger="0.1">
+          <h2 class="reveal font-heading font-bold text-white text-3xl sm:text-4xl tracking-tight">
+            Así trabajo contigo
+          </h2>
+          <p class="reveal text-muted text-base sm:text-lg mt-4">
+            De la primera conversación al sistema funcionando, en cuatro pasos.
+          </p>
+        </div>
+
+        <!-- Timeline vertical: los pasos se enganchan con nodos a la línea
+             del camino de luz, que atraviesa esta sección en vertical
+             (centro en desktop, izquierda en móvil). Cada nodo se enciende
+             cuando el punto guía del scroll pasa por él. -->
+        <div class="timeline mt-8 lg:mt-12" data-stagger="0.12">
+          <div class="tl-step reveal">
+            <span class="tl-node" aria-hidden="true"></span>
+            <div class="tl-content">
+              <div class="step-num">01</div>
+              <h3 class="font-heading font-semibold text-white text-xl mt-2">Llamada de diagnóstico</h3>
+              <p class="text-muted text-[15px] leading-relaxed mt-2 max-w-sm">
+                Me cuentas cómo funciona tu negocio y qué proceso quieres automatizar.
+              </p>
+            </div>
+          </div>
+          <div class="tl-step reveal">
+            <span class="tl-node" aria-hidden="true"></span>
+            <div class="tl-content">
+              <div class="step-num">02</div>
+              <h3 class="font-heading font-semibold text-white text-xl mt-2">Propuesta a medida</h3>
+              <p class="text-muted text-[15px] leading-relaxed mt-2 max-w-sm">
+                Te presento el sistema personalizado para tu negocio con alcance y costo claro. Sin letra chica.
+              </p>
+            </div>
+          </div>
+          <div class="tl-step reveal">
+            <span class="tl-node" aria-hidden="true"></span>
+            <div class="tl-content">
+              <div class="step-num">03</div>
+              <h3 class="font-heading font-semibold text-white text-xl mt-2">Implementación</h3>
+              <p class="text-muted text-[15px] leading-relaxed mt-2 max-w-sm">
+                Configuro todas las integraciones y construyo el sistema. Tú me das la información, yo lo armo.
+              </p>
+            </div>
+          </div>
+          <div class="tl-step reveal">
+            <span class="tl-node" aria-hidden="true"></span>
+            <div class="tl-content">
+              <div class="step-num">04</div>
+              <h3 class="font-heading font-semibold text-white text-xl mt-2">Lanzamiento y soporte</h3>
+              <p class="text-muted text-[15px] leading-relaxed mt-2 max-w-sm">
+                Activamos el sistema juntos y te acompaño con mantenimiento continuo para que todo funcione siempre.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STACK TECNOLÓGICO ============ -->
+    <section id="stack" data-light-stop data-lit class="relative py-20 lg:py-32">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="max-w-2xl" data-stagger="0.1">
+          <h2 class="reveal font-heading font-bold text-white text-3xl sm:text-4xl tracking-tight">
+            Las herramientas con las que construyo
+          </h2>
+          <p class="reveal text-muted text-base sm:text-lg mt-4">
+            Elijo la combinación exacta según cada proyecto.
+          </p>
+        </div>
+      </div>
+
+      <!-- Constelación: las 4 herramientas como tarjetas flotantes en
+           posiciones asimétricas, conectadas por una red de líneas
+           sutiles (las dibuja main.js). "Yo conecto estas herramientas". -->
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="constellation mt-12 lg:mt-16" id="constellation" data-stagger="0.12">
+          <svg class="const-lines" aria-hidden="true"></svg>
+
+          <article class="const-card glow-card reveal">
+            <div class="const-logo" style="background: rgba(37, 211, 102, 0.12); color: #25D366;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+            </div>
+            <h3 class="font-heading font-semibold text-white text-lg mt-4">WhatsApp API</h3>
+            <span class="const-tag">Automatización total</span>
+            <p class="text-muted text-[13.5px] leading-relaxed mt-3">
+              Conexión oficial con WhatsApp Cloud API de Meta. Sin riesgo de baneo, estable y segura.
+            </p>
+          </article>
+
+          <article class="const-card glow-card reveal">
+            <div class="const-logo" style="background: rgba(234, 75, 113, 0.1);">
+              <img src="assets/logos/n8n-color.svg" alt="n8n" width="34" height="34" />
+            </div>
+            <h3 class="font-heading font-semibold text-white text-lg mt-4">n8n</h3>
+            <span class="const-tag">Motor de automatización</span>
+            <p class="text-muted text-[13.5px] leading-relaxed mt-3">
+              Toda la lógica del sistema vive en n8n. Los flujos, las condiciones y las integraciones
+              se orquestan desde aquí.
+            </p>
+          </article>
+
+          <article class="const-card glow-card reveal">
+            <div class="const-logo" style="background: rgba(43, 107, 228, 0.14); color: #5A8DFF;">
+              <span class="font-heading font-bold text-[26px] leading-none">K</span>
+            </div>
+            <h3 class="font-heading font-semibold text-white text-lg mt-4">Kommo CRM</h3>
+            <span class="const-tag">Pipeline de ventas</span>
+            <p class="text-muted text-[13.5px] leading-relaxed mt-3">
+              Cada contacto se registra automáticamente. Las conversaciones se organizan por etapas
+              y tu equipo ve en tiempo real en qué punto está cada lead.
+            </p>
+          </article>
+
+          <article class="const-card glow-card reveal">
+            <div class="const-logo" style="background: rgba(34, 158, 217, 0.14); color: #229ED9;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 21 12 14l-7-2.5L21.5 3z"/><path d="M21.5 3 12 14"/></svg>
+            </div>
+            <h3 class="font-heading font-semibold text-white text-lg mt-4">Telegram</h3>
+            <span class="const-tag">Notificaciones al equipo</span>
+            <p class="text-muted text-[13.5px] leading-relaxed mt-3">
+              Cuando el agente detecta que un lead necesita atención humana, notifica al equipo al
+              instante para que nadie quede sin respuesta.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PARA QUIÉN ES ============ -->
+    <section id="para-quien" data-light-stop data-lit class="relative py-20 lg:py-32">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="max-w-2xl mx-auto text-center" data-stagger="0.1">
+          <h2 class="reveal font-heading font-bold text-white text-3xl sm:text-4xl tracking-tight">
+            ¿Es para ti?
+          </h2>
+          <p class="reveal text-muted text-base sm:text-lg mt-4">
+            Funciona para negocios latinoamericanos que reciben un buen volumen de mensajes o
+            tienen procesos manuales que les están robando tiempo.
+          </p>
+        </div>
+
+        <!-- Tags con entrada escalonada + flotación suave desincronizada -->
+        <div class="flex flex-wrap justify-center gap-3 mt-12 max-w-3xl mx-auto" data-stagger="0.08">
+          <span class="biz-tag reveal"><i data-lucide="stethoscope"></i>Clínicas y consultorios</span>
+          <span class="biz-tag reveal"><i data-lucide="building-2"></i>Inmobiliarias</span>
+          <span class="biz-tag reveal"><i data-lucide="shopping-bag"></i>Tiendas y e-commerce</span>
+          <span class="biz-tag reveal"><i data-lucide="utensils"></i>Restaurantes y catering</span>
+          <span class="biz-tag reveal"><i data-lucide="dumbbell"></i>Centros de estética y fitness</span>
+          <span class="biz-tag reveal"><i data-lucide="repeat"></i>Cualquier negocio con procesos repetitivos</span>
+        </div>
+
+        <p id="closing-line"
+           class="font-heading font-semibold text-white text-2xl sm:text-3xl lg:text-4xl leading-snug tracking-tight text-center max-w-3xl mx-auto mt-16 lg:mt-24">
+          Si tu negocio pierde tiempo en tareas que se pueden automatizar, hablemos.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section id="faq" data-light-stop data-lit class="relative py-20 lg:py-32">
+      <div class="max-w-3xl mx-auto px-5 sm:px-8">
+        <h2 class="reveal font-heading font-bold text-white text-3xl sm:text-4xl tracking-tight text-center">
+          Preguntas frecuentes
+        </h2>
+
+        <div class="space-y-3.5 mt-12" data-stagger="0.08">
+          <div class="reveal faq-item">
+            <button class="faq-q" type="button">
+              ¿En qué se diferencia un agente IA de un chatbot normal?
+              <i data-lucide="chevron-down" class="chev w-5 h-5"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner">
+              <p>Un chatbot básico responde con opciones predefinidas o botones. El agente IA de
+              InteractIA lee toda la conversación, entiende el contexto y genera una respuesta
+              coherente como lo haría una persona. También transcribe notas de voz y detecta cuándo
+              escalar al equipo humano.</p>
+            </div></div>
+          </div>
+
+          <div class="reveal faq-item">
+            <button class="faq-q" type="button">
+              ¿Necesito instalar algo o cambiar mi número de WhatsApp?
+              <i data-lucide="chevron-down" class="chev w-5 h-5"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner">
+              <p>No instalas nada en tu teléfono. La conexión se hace vía WhatsApp Cloud API oficial
+              de Meta, lo que garantiza estabilidad y elimina el riesgo de baneo. Tu número puede
+              seguir siendo el mismo que ya usas para tu negocio.</p>
+            </div></div>
+          </div>
+
+          <div class="reveal faq-item">
+            <button class="faq-q" type="button">
+              ¿Qué pasa cuando el agente no sabe responder algo?
+              <i data-lucide="chevron-down" class="chev w-5 h-5"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner">
+              <p>El agente detecta automáticamente cuándo una conversación necesita atención humana,
+              se silencia y notifica al equipo al instante. En el CRM ya tienes el resumen del chat
+              para que tu agente humano tenga todo el contexto antes de responder.</p>
+            </div></div>
+          </div>
+
+          <div class="reveal faq-item">
+            <button class="faq-q" type="button">
+              ¿Cuánto tiempo tarda la implementación?
+              <i data-lucide="chevron-down" class="chev w-5 h-5"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner">
+              <p>Depende de la complejidad del proyecto, pero en la mayoría de los casos el sistema
+              está funcionando en 1 a 2 semanas. Lo que más influye es la velocidad con la que me
+              entregas la información de tu negocio.</p>
+            </div></div>
+          </div>
+
+          <div class="reveal faq-item">
+            <button class="faq-q" type="button">
+              ¿Trabajan con negocios fuera de Venezuela?
+              <i data-lucide="chevron-down" class="chev w-5 h-5"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner">
+              <p>Sí. Aunque mi mercado principal es Venezuela, trabajo con negocios de cualquier
+              país latinoamericano. El sistema funciona igual independientemente de la ubicación.</p>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACTO ============ -->
+    <section id="contacto" data-light-stop data-lit class="relative py-20 lg:py-32">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="flex flex-col lg:flex-row gap-12 lg:gap-16">
+
+          <!-- Copy + contacto directo -->
+          <div class="w-full lg:w-[40%]" data-stagger="0.1">
+            <div class="reveal text-[12px] tracking-[0.22em] uppercase text-muted">05 · Hablemos</div>
+            <h2 class="reveal font-heading font-bold text-white text-3xl sm:text-4xl tracking-tight mt-4">
+              ¿Listo para conectar tu negocio?
+            </h2>
+            <p class="reveal text-muted text-base sm:text-lg leading-relaxed mt-5">
+              Cuéntame qué necesitas y te respondo en menos de 24 horas. Sin formularios eternos,
+              sin call centers. Hablas directamente conmigo.
+            </p>
+
+            <div class="reveal mt-10 divide-y divide-white/[0.06] border-y border-white/[0.06]">
+              <div class="py-5">
+                <div class="text-[11px] tracking-[0.2em] uppercase text-muted">WhatsApp directo</div>
+                <!-- TODO Santi: pon aquí el número (idealmente el de la agencia,
+                     que responde el agente IA — prueba viva del producto) y
+                     actualiza también el enlace wa.me -->
+                <a href="https://wa.me/58XXXXXXXXXX" target="_blank" rel="noopener"
+                   class="block text-white text-lg font-medium mt-1.5 hover:text-electric transition-colors duration-300">
+                  [SANTI: PON AQUÍ TU NÚMERO]
+                </a>
+              </div>
+              <div class="py-5">
+                <div class="text-[11px] tracking-[0.2em] uppercase text-muted">Correo</div>
+                <a href="mailto:santiagojsilvav@gmail.com"
+                   class="block text-white text-lg font-medium mt-1.5 hover:text-electric transition-colors duration-300">
+                  santiagojsilvav@gmail.com
+                </a>
+              </div>
+              <div class="py-5">
+                <div class="text-[11px] tracking-[0.2em] uppercase text-muted">Ubicación</div>
+                <div class="text-white text-lg font-medium mt-1.5">Caracas · Remoto en LatAm y Estados Unidos</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulario -->
+          <div class="w-full lg:w-[60%]">
+            <form id="contact-form" novalidate
+                  class="reveal glow-card p-7 sm:p-10 border-electric/20">
+              <div class="text-[11px] tracking-[0.25em] uppercase text-muted mb-8">Cotización gratuita</div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="field">
+                  <label class="field-label" for="cf-name">Tu nombre</label>
+                  <input class="field-input" id="cf-name" name="name" type="text"
+                         placeholder="Andrés Ramírez" required autocomplete="name" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cf-biz">Tipo de negocio</label>
+                  <input class="field-input" id="cf-biz" name="business" type="text"
+                         placeholder="Restaurante, clínica, e-commerce..." required />
+                </div>
+                <div class="field sm:col-span-2">
+                  <label class="field-label" for="cf-phone">WhatsApp</label>
+                  <input class="field-input" id="cf-phone" name="whatsapp" type="tel"
+                         placeholder="+58 414 000 0000" required autocomplete="tel" />
+                </div>
+                <div class="field sm:col-span-2">
+                  <label class="field-label" for="cf-msg">Cuéntanos</label>
+                  <textarea class="field-input resize-none" id="cf-msg" name="message" rows="4"
+                            placeholder="¿Qué proceso quieres automatizar? ¿Qué te frena hoy?" required></textarea>
+                </div>
+              </div>
+
+              <p id="cf-error" class="hidden text-sm text-[#8FB0FF] mt-4">
+                Completa todos los campos para poder responderte bien.
+              </p>
+
+              <button type="submit" id="cf-submit"
+                      class="magnetic btn-primary w-full sm:w-auto mt-8">
+                <div class="points_wrapper" aria-hidden="true">
+                  <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+                  <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+                </div>
+                <span class="btn-label">Enviar mensaje
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </span>
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CTA FINAL ============ -->
+    <section data-light-stop data-lit class="relative py-24 lg:py-36 overflow-hidden">
+      <div class="cta-glow" aria-hidden="true"></div>
+      <div class="relative max-w-3xl mx-auto px-5 sm:px-8 text-center" data-stagger="0.12">
+        <h2 class="reveal font-heading font-bold text-white text-3xl sm:text-5xl leading-[1.12] tracking-tight">
+          ¿Listo para que tu negocio trabaje por ti?
+        </h2>
+        <p class="reveal text-muted text-base sm:text-lg mt-5 max-w-xl mx-auto">
+          Cuéntame qué proceso te está robando tiempo. Si se puede automatizar, te digo cómo.
+        </p>
+        <div class="reveal mt-9">
+          <a href="https://cal.com/santiago-silva-lvftf3/30min" target="_blank" rel="noopener"
+             class="magnetic btn-primary">
+            <div class="points_wrapper" aria-hidden="true">
+              <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+              <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+            </div>
+            <span class="btn-label">Habla conmigo
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="relative z-[2]" style="border-top: 1px solid rgba(61, 111, 255, 0.1);">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 py-14 lg:py-16 grid grid-cols-1 sm:grid-cols-3 items-center gap-8">
+
+      <!-- Izquierda: logo + copyright -->
+      <div class="text-center sm:text-left">
+        <a href="#" class="font-heading font-bold text-white text-lg tracking-tight">
+          Interact<span class="text-electric">IA</span>
+        </a>
+        <p class="text-muted text-sm mt-1.5">© 2026 InteractIA</p>
+      </div>
+
+      <!-- Centro: Instagram, protagonista del footer -->
+      <div class="flex justify-center">
+        <a href="https://instagram.com/interactia.ia" target="_blank" rel="noopener"
+           class="insta-pill">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg>
+          @interactia.ia
+        </a>
+      </div>
+
+      <!-- Derecha: origen -->
+      <p class="text-muted text-sm text-center sm:text-right">Hecho en Caracas, Venezuela</p>
+
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

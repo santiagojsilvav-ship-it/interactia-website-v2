@@ -1,0 +1,1043 @@
+/* ============================================================
+   InteractIA — estilos base, animaciones y componentes
+   Paleta: navy #080B1A · azul eléctrico #3D6FFF · texto #CBD5E1
+   ============================================================ */
+
+:root {
+  --navy: #080B1A;
+  --electric: #3D6FFF;
+  --electric-soft: rgba(61, 111, 255, 0.55);
+  --text-body: #CBD5E1;
+  --text-muted: #7C87A0;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(255, 255, 255, 0.03);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* relative: #light-layer (absolute, height 100%) debe medirse contra el
+     documento completo, no contra el viewport */
+  position: relative;
+  background-color: var(--navy);
+  color: var(--text-body);
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .font-heading {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+}
+
+::selection {
+  background: rgba(61, 111, 255, 0.35);
+  color: #fff;
+}
+
+/* Ambiente: leve resplandor azul en el borde superior de la página.
+   Acotado para que muera ANTES de la zona del video del hero: el video
+   trae el fondo #080B1A exacto, y cualquier tinte azul de la página a
+   su alrededor lo delataría como un rectángulo más oscuro. */
+.ambient-top {
+  position: absolute;
+  top: -18vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140vw;
+  height: 36vh;
+  background: radial-gradient(ellipse at center,
+    rgba(61, 111, 255, 0.09) 0%,
+    rgba(61, 111, 255, 0.03) 40%,
+    transparent 68%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Anclas: dejar espacio para el nav fijo */
+section[id] { scroll-margin-top: 84px; }
+
+/* ============================================================
+   HERO — ciudad de fondo + overlay
+   ============================================================ */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('../assets/hero-bg.jpg');
+  background-size: cover;
+  /* 16:10: anclada abajo — la imagen trae su propio fade inferior a navy */
+  background-position: center bottom;
+  background-repeat: no-repeat;
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  /* Dos gradientes: fade inferior hacia el navy de la página +
+     oscurecimiento lateral (texto a la izquierda, anillo a la derecha).
+     El fade inferior alcanza #080B1A COMPLETO antes del borde de la
+     sección: el fondo propio de la imagen muere en rgb(1,6,38) (más
+     azul que el navy) y sin esto se ve una franja en el empalme. */
+  background:
+    linear-gradient(to bottom,
+      transparent 55%,
+      rgba(8, 11, 26, 0.6) 78%,
+      #080B1A 94%),
+    linear-gradient(to right,
+      rgba(8, 11, 26, 0.85) 0%,
+      rgba(8, 11, 26, 0.55) 40%,
+      rgba(8, 11, 26, 0.35) 70%,
+      rgba(8, 11, 26, 0.5) 100%);
+}
+@media (max-width: 767px) {
+  .hero-bg { background-position: center; }
+  .hero-overlay {
+    /* En móvil: oscurecimiento más uniforme para legibilidad */
+    background:
+      linear-gradient(to bottom,
+        transparent 55%,
+        rgba(8, 11, 26, 0.6) 78%,
+        #080B1A 94%),
+      rgba(8, 11, 26, 0.72);
+  }
+}
+
+/* Vidrio esmerilado compartido: toda pill/tag/badge difumina lo que
+   pasa por detrás (el camino de luz) igual que las tarjetas grandes */
+.hero-pill,
+.biz-tag,
+.stage-chip,
+.glass-pill {
+  background: rgba(255, 255, 255, 0.03);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+#nav {
+  transition: background-color 0.4s ease, border-color 0.4s ease,
+              backdrop-filter 0.4s ease;
+  border-bottom: 1px solid transparent;
+}
+#nav.scrolled {
+  background: rgba(8, 11, 26, 0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.nav-link {
+  position: relative;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+.nav-link:hover { color: #fff; }
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: var(--electric);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* Menú móvil */
+#mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(8, 11, 26, 0.92);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+#mobile-menu.open { opacity: 1; visibility: visible; }
+#mobile-menu .menu-item {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#mobile-menu.open .menu-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hamburguesa */
+.burger-line {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+  transform-origin: center;
+}
+.burger.active .burger-line:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.burger.active .burger-line:nth-child(2) { opacity: 0; }
+.burger.active .burger-line:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+/* CTA principal: botón con partículas flotantes, gradiente radial
+   inferior y brillo interno por capas. Convive con el efecto
+   magnético (el JS anima transform inline sobre .magnetic). */
+.btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 52px;
+  padding: 14px 28px;
+  background:
+    radial-gradient(ellipse 90% 65% at 50% 125%, rgba(96, 165, 250, 0.7), transparent 65%),
+    linear-gradient(180deg, #4E7BFF 0%, #3D6FFF 55%, #2E5BE8 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 28px -8px rgba(61, 111, 255, 0.55);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.4s ease;
+  will-change: transform;
+}
+/* Brillo interior en capas */
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(0.75rem - 1px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 42%);
+  pointer-events: none;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.75rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+              inset 0 -10px 22px rgba(96, 165, 250, 0.35);
+  pointer-events: none;
+}
+.btn-primary:hover {
+  box-shadow: 0 10px 40px -6px rgba(61, 111, 255, 0.8),
+              0 0 24px rgba(61, 111, 255, 0.35);
+}
+.btn-primary .btn-label {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* Versión compacta (nav) */
+.btn-primary.btn-sm {
+  min-height: 44px;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+/* Partículas flotantes: transform + opacity, composición en GPU */
+.points_wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+.points_wrapper .point {
+  position: absolute;
+  bottom: -6px;
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: floating-points infinite linear;
+  will-change: transform, opacity;
+}
+@keyframes floating-points {
+  0%   { transform: translateY(0);     opacity: 0; }
+  15%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: translateY(-58px); opacity: 0; }
+}
+.point:nth-child(1)  { left: 10%; animation-duration: 2.35s; animation-delay: 0.2s; }
+.point:nth-child(2)  { left: 30%; animation-duration: 2.5s;  animation-delay: 0.5s; }
+.point:nth-child(3)  { left: 25%; animation-duration: 2.2s;  animation-delay: 0.1s; }
+.point:nth-child(4)  { left: 44%; animation-duration: 2.05s; }
+.point:nth-child(5)  { left: 50%; animation-duration: 1.9s;  animation-delay: 0.35s; }
+.point:nth-child(6)  { left: 75%; animation-duration: 1.5s;  animation-delay: 1.2s; }
+.point:nth-child(7)  { left: 88%; animation-duration: 2.2s;  animation-delay: 0.75s; }
+.point:nth-child(8)  { left: 58%; animation-duration: 2.25s; animation-delay: 0.9s; }
+.point:nth-child(9)  { left: 98%; animation-duration: 2.6s;  animation-delay: 1.5s; }
+.point:nth-child(10) { left: 65%; animation-duration: 2.5s;  animation-delay: 0.4s; }
+
+/* Flecha del CTA: se redibuja y avanza al hover */
+.btn-primary .icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.35s ease-out;
+  /* Señal sutil permanente de "acción disponible" */
+  animation: arrowNudge 1.5s ease-in-out infinite;
+}
+@keyframes arrowNudge {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(2px); }
+}
+.btn-primary:hover .icon {
+  animation: none; /* el hover toma el control con el gesto más marcado */
+  transform: translateX(4px);
+}
+.btn-primary:hover .icon path {
+  stroke-dasharray: 24;
+  animation: arrowDash 0.45s ease-out forwards;
+}
+@keyframes arrowDash {
+  from { stroke-dashoffset: 24; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.btn-ghost {
+  border: 1px solid var(--card-border);
+  color: var(--text-body);
+  border-radius: 9999px;
+  transition: border-color 0.3s ease, color 0.3s ease,
+              transform 0.4s ease, box-shadow 0.4s ease;
+}
+.btn-ghost:hover {
+  border-color: rgba(61, 111, 255, 0.5);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px -8px rgba(61, 111, 255, 0.4);
+}
+
+/* ============================================================
+   HERO — anillo animado
+   ============================================================ */
+.ring-stage {
+  perspective: 1200px;
+}
+
+/* El fondo del video viene forzado a #080B1A en la codificación
+   (lutrgb + BT.709). La máscara NO es por el color: el resplandor
+   del propio anillo llega al borde del frame y se corta en seco —
+   ese escalón de luz dibuja un rectángulo. El fade de bordes lo
+   disuelve. Sin blend ni filter (los stacking contexts de .reveal
+   y main aíslan mix-blend-mode del fondo de la página). */
+.ring-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-mask-image: radial-gradient(ellipse 70% 68% at center, black 52%, transparent 76%);
+  mask-image: radial-gradient(ellipse 70% 68% at center, black 52%, transparent 76%);
+}
+
+/* Resplandor ambiental estático detrás del anillo */
+.ring-glow {
+  position: absolute;
+  inset: 8%;
+  background: radial-gradient(ellipse at center,
+    rgba(61, 111, 255, 0.30) 0%,
+    rgba(61, 111, 255, 0.10) 45%,
+    transparent 72%);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* Typewriter del H1: ancho reservado (la palabra más larga es
+   "quieres") para que la línea no salte al escribir/borrar */
+.tw-wrap {
+  display: inline-block;
+  min-width: 7.4ch;
+  text-align: left;
+  white-space: nowrap;
+}
+.tw-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--electric);
+  font-weight: 500;
+  animation: twBlink 1s steps(2, start) infinite;
+}
+@keyframes twBlink {
+  0%, 49%  { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Pills del hero */
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 9999px;
+  border: 1px solid var(--card-border);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  color: var(--text-muted);
+  transition: border-color 0.4s ease, color 0.4s ease, background 0.4s ease;
+}
+.hero-pill:hover {
+  border-color: rgba(61, 111, 255, 0.45);
+  color: var(--text-body);
+  background: rgba(61, 111, 255, 0.06);
+}
+.hero-pill svg {
+  width: 14px;
+  height: 14px;
+  color: var(--electric);
+}
+
+/* ============================================================
+   CAMINO DE LUZ (scroll)
+   ============================================================ */
+#light-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+#light-svg { display: block; }
+
+#light-svg .trail-halo,
+#light-svg .trail-mid,
+#light-svg .trail-core {
+  fill: none;
+  stroke-linecap: round;
+}
+/* Neón por capas: trazos apilados en vez de filter blur
+   (mismo look, sin repintados caros en móvil).
+   Línea de luz fina y sutil: núcleo 2.5px + glow suave. */
+#light-svg .trail-halo { stroke: rgba(61, 111, 255, 0.10); stroke-width: 18; }
+#light-svg .trail-mid  { stroke: rgba(61, 111, 255, 0.28); stroke-width: 7; }
+#light-svg .trail-core { stroke: rgba(185, 205, 255, 0.95); stroke-width: 2.5; }
+
+/* Cometa: la punta de luz que acompaña el dedo */
+#comet {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+/* El punto guía es la fuente de luz principal: halo interno intenso
+   + halo externo difuso que ilumina ~50px a su alrededor */
+#comet::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #E4EDFF;
+  box-shadow: 0 0 12px 4px rgba(190, 210, 255, 0.95),
+              0 0 34px 14px rgba(61, 111, 255, 0.55),
+              0 0 62px 30px rgba(61, 111, 255, 0.3);
+}
+#comet::after {
+  content: '';
+  position: absolute;
+  left: -170px;
+  top: -170px;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(61, 111, 255, 0.18) 0%,
+    rgba(61, 111, 255, 0.07) 40%,
+    transparent 70%);
+}
+
+/* ============================================================
+   REVEAL DE SECCIONES
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0s);
+  will-change: opacity, transform;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Las cards "se encienden" cuando la luz llega a su sección */
+.glow-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1rem;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: border-color 0.35s ease-out, box-shadow 0.35s ease-out,
+              transform 0.35s ease-out;
+}
+.lit .glow-card {
+  border-color: rgba(61, 111, 255, 0.22);
+  box-shadow: 0 0 40px -18px rgba(61, 111, 255, 0.35),
+              0 0 0 1px rgba(61, 111, 255, 0.05) inset;
+}
+.glow-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(61, 111, 255, 0.5);
+  box-shadow: 0 0 36px rgba(61, 111, 255, 0.15),
+              0 16px 48px -16px rgba(61, 111, 255, 0.45),
+              0 0 0 1px rgba(61, 111, 255, 0.1) inset;
+}
+/* El acento interno se satura al hover de la card */
+.glow-card:hover .card-icon {
+  background: rgba(61, 111, 255, 0.22);
+  border-color: rgba(61, 111, 255, 0.6);
+  color: #7DA2FF;
+  box-shadow: 0 0 22px -4px rgba(61, 111, 255, 0.55);
+}
+.glow-card:hover .step-num {
+  filter: saturate(1.5) brightness(1.25);
+}
+.glow-card:hover h3 { color: #fff; }
+
+/* Móvil (sin hover): respiración sutil cuando la card ya se reveló.
+   El delay de 1.5s deja terminar la transición de reveal antes de que
+   la animación tome control del transform. */
+@media (hover: none) {
+  .glow-card.visible {
+    animation: cardBreath 3s ease-in-out 1.5s infinite;
+  }
+}
+@keyframes cardBreath {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.01); }
+}
+
+/* Ícono dentro de las cards */
+.card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(61, 111, 255, 0.1);
+  border: 1px solid rgba(61, 111, 255, 0.25);
+  color: var(--electric);
+  transition: background 0.35s ease-out, border-color 0.35s ease-out,
+              color 0.35s ease-out, box-shadow 0.35s ease-out;
+}
+.card-icon svg { width: 22px; height: 22px; }
+
+/* ============================================================
+   MOCKUP DE TELÉFONO (CSS puro)
+   ============================================================ */
+.phone {
+  width: 232px;
+  border-radius: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, #0B1023 0%, #090D1E 100%);
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.03),
+              0 24px 60px -20px rgba(0, 0, 0, 0.8),
+              0 0 60px -20px rgba(61, 111, 255, 0.3);
+  overflow: hidden;
+}
+.phone-notch {
+  width: 84px;
+  height: 20px;
+  margin: 8px auto 0;
+  border-radius: 12px;
+  background: #04060F;
+}
+.phone-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.phone-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4E7BFF, #2E5BE8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+.phone-body {
+  padding: 12px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bubble {
+  max-width: 82%;
+  padding: 8px 11px;
+  border-radius: 14px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.bubble.in {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom-left-radius: 4px;
+  color: var(--text-body);
+}
+.bubble.out {
+  align-self: flex-end;
+  background: linear-gradient(135deg, rgba(61, 111, 255, 0.9), rgba(46, 91, 232, 0.9));
+  border-bottom-right-radius: 4px;
+  color: #fff;
+}
+.bubble-tag {
+  align-self: flex-start;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--electric);
+  background: rgba(61, 111, 255, 0.1);
+  border: 1px solid rgba(61, 111, 255, 0.3);
+  border-radius: 9999px;
+  padding: 3px 8px;
+}
+/* Indicador de escritura */
+.typing {
+  align-self: flex-start;
+  display: flex;
+  gap: 4px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+}
+.typing span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: typingDot 1.4s ease-in-out infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.18s; }
+.typing span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes typingDot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30%           { opacity: 1;   transform: translateY(-3px); }
+}
+
+/* Etapas del pipeline dentro de la card */
+.stage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.stage-chip .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--electric);
+}
+
+/* ============================================================
+   CÓMO TRABAJO — pasos
+   ============================================================ */
+.step-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums; /* ancho estable durante el conteo */
+  background: linear-gradient(180deg, rgba(120, 155, 255, 0.9), rgba(61, 111, 255, 0.15));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: filter 0.35s ease-out;
+}
+
+/* ============================================================
+   TIMELINE — "Así trabajo contigo"
+   La línea vertical ES el camino de luz global (main.js enruta el
+   path por los nodos). Los nodos se encienden al pasar el punto guía.
+   ============================================================ */
+.timeline { position: relative; }
+
+.tl-step {
+  position: relative;
+  padding: 1.1rem 0 1.1rem 3.9rem; /* móvil: aire entre el carril y el número */
+}
+
+.tl-node {
+  position: absolute;
+  left: 14px;
+  top: 1.8rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #0B1023;
+  border: 2px solid rgba(61, 111, 255, 0.4);
+  transform: translateX(-50%);
+  transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+.tl-node.node-lit {
+  background: var(--electric);
+  border-color: #AFC6FF;
+  box-shadow: 0 0 12px 3px rgba(61, 111, 255, 0.75),
+              0 0 30px 10px rgba(61, 111, 255, 0.3);
+}
+
+@media (min-width: 768px) {
+  .tl-step {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 2.1rem 0;
+  }
+  .tl-node { left: 50%; top: 2.9rem; }
+  /* Pasos alternados a lado y lado de la línea central */
+  .tl-step:nth-child(odd) .tl-content {
+    grid-column: 1;
+    text-align: right;
+    padding-right: 4.5rem;
+  }
+  .tl-step:nth-child(odd) .tl-content p { margin-left: auto; }
+  .tl-step:nth-child(even) .tl-content {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: left;
+    padding-left: 4.5rem;
+  }
+}
+
+/* ============================================================
+   CONSTELACIÓN — stack tecnológico
+   Tarjetas flotantes en posiciones asimétricas, conectadas por
+   una red de líneas sutiles (SVG dibujado por main.js).
+   ============================================================ */
+.constellation { position: relative; }
+
+.const-card {
+  position: relative;
+  padding: 1.8rem 1.6rem;
+  text-align: center;
+  max-width: 420px;
+  margin: 0 auto;
+}
+/* Móvil: conector vertical entre tarjetas apiladas */
+.const-card + .const-card { margin-top: 3rem; }
+.const-card + .const-card::before {
+  content: '';
+  position: absolute;
+  top: -3rem;
+  left: 50%;
+  width: 1px;
+  height: 3rem;
+  background: linear-gradient(180deg,
+    rgba(61, 111, 255, 0.05),
+    rgba(61, 111, 255, 0.35),
+    rgba(61, 111, 255, 0.05));
+}
+
+.const-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  margin: 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.const-logo svg, .const-logo img { width: 32px; height: 32px; }
+
+.const-tag {
+  display: block;
+  color: var(--electric);
+  font-size: 12.5px;
+  margin-top: 2px;
+}
+
+.const-lines { display: none; }
+
+@media (min-width: 1024px) {
+  .constellation { min-height: 600px; }
+  .const-card {
+    position: absolute;
+    width: 300px;
+    margin: 0;
+  }
+  .const-card + .const-card { margin-top: 0; }
+  .const-card + .const-card::before { display: none; }
+  /* Distribución asimétrica balanceada */
+  .const-card:nth-of-type(1) { left: 2%; top: 0; }
+  .const-card:nth-of-type(2) { right: 5%; top: 48px; }
+  .const-card:nth-of-type(3) { left: 20%; bottom: 0; }
+  .const-card:nth-of-type(4) { right: 16%; bottom: 24px; }
+
+  .const-lines {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .const-lines line {
+    stroke: rgba(61, 111, 255, 0.16);
+    stroke-width: 1;
+    transition: stroke 0.3s ease;
+  }
+  .const-lines line.active { stroke: rgba(61, 111, 255, 0.6); }
+}
+
+/* ============================================================
+   PARA QUIÉN — tags y frase iluminada
+   ============================================================ */
+.biz-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: 9999px;
+  /* Vidrio esmerilado explícito: difumina el camino de luz que pasa
+     por detrás, igual que las tarjetas grandes */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--text-body);
+  font-size: 0.9rem;
+  transition: border-color 0.35s ease-out, box-shadow 0.35s ease-out,
+              transform 0.35s ease-out, color 0.35s ease-out;
+}
+.biz-tag:hover {
+  border-color: rgba(61, 111, 255, 0.5);
+  box-shadow: 0 0 32px rgba(61, 111, 255, 0.15),
+              0 8px 28px -10px rgba(61, 111, 255, 0.45);
+  transform: translateY(-4px);
+  color: #fff;
+}
+
+/* Flotación suave desincronizada, arranca después del reveal */
+.biz-tag.visible { animation: bizFloat 6s ease-in-out infinite; }
+.biz-tag.visible:hover { animation: none; } /* la flotación cede al hover */
+.biz-tag:nth-child(1) { animation-delay: 1.6s; }
+.biz-tag:nth-child(2) { animation-delay: 2.3s; }
+.biz-tag:nth-child(3) { animation-delay: 1.9s; }
+.biz-tag:nth-child(4) { animation-delay: 2.7s; }
+.biz-tag:nth-child(5) { animation-delay: 2.1s; }
+.biz-tag:nth-child(6) { animation-delay: 3s; }
+@keyframes bizFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.biz-tag svg { width: 15px; height: 15px; color: var(--electric); }
+
+/* Frase de cierre: palabra por palabra */
+#closing-line .w {
+  display: inline-block;
+  opacity: 0.14;
+  transition: opacity 0.7s ease, text-shadow 0.7s ease;
+  transition-delay: var(--w-delay, 0s);
+}
+#closing-line.lit-up .w {
+  opacity: 1;
+  text-shadow: 0 0 24px rgba(61, 111, 255, 0.35);
+}
+
+/* ============================================================
+   FAQ — acordeón
+   ============================================================ */
+.faq-item {
+  border: 1px solid var(--card-border);
+  border-radius: 1rem;
+  background: var(--card-bg);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: border-color 0.4s ease;
+  overflow: hidden;
+}
+.faq-item.open { border-color: rgba(61, 111, 255, 0.3); }
+.faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: left;
+  padding: 1.15rem 1.35rem;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+}
+.faq-q .chev {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), color 0.4s ease;
+}
+.faq-item.open .faq-q .chev { transform: rotate(180deg); color: var(--electric); }
+.faq-a {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.faq-item.open .faq-a { grid-template-rows: 1fr; }
+.faq-a-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+.faq-a-inner p {
+  padding: 0 1.35rem 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   CONTACTO — formulario
+   ============================================================ */
+.field { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.field-label {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+/* El label se ilumina cuando su campo tiene el focus */
+.field:focus-within .field-label { color: var(--electric); }
+
+.field-input {
+  width: 100%;
+  background: rgba(4, 6, 15, 0.6); /* más oscuro que el card */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease,
+              background 0.3s ease;
+}
+.field-input::placeholder { color: rgba(124, 135, 160, 0.55); }
+.field-input:focus {
+  border-color: rgba(61, 111, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(61, 111, 255, 0.12),
+              0 0 24px -8px rgba(61, 111, 255, 0.4);
+  background: rgba(4, 6, 15, 0.8);
+}
+/* Campo requerido vacío tras intento de envío */
+.field-input.invalid { border-color: rgba(61, 111, 255, 0.75); }
+
+/* ============================================================
+   CTA FINAL
+   ============================================================ */
+.cta-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, 110vw);
+  height: 420px;
+  background: radial-gradient(ellipse at center,
+    rgba(61, 111, 255, 0.16) 0%,
+    rgba(61, 111, 255, 0.05) 45%,
+    transparent 72%);
+  pointer-events: none;
+}
+
+/* ============================================================
+   FOOTER — pill de Instagram
+   ============================================================ */
+.insta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.7rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(61, 111, 255, 0.35);
+  background: rgba(61, 111, 255, 0.07);
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: border-color 0.35s ease-out, box-shadow 0.35s ease-out,
+              transform 0.35s ease-out, background 0.35s ease-out;
+}
+.insta-pill svg { color: var(--electric); }
+.insta-pill:hover {
+  border-color: rgba(61, 111, 255, 0.7);
+  background: rgba(61, 111, 255, 0.12);
+  box-shadow: 0 0 32px rgba(61, 111, 255, 0.25),
+              0 8px 28px -10px rgba(61, 111, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   ACCESIBILIDAD — reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .typing span,
+  .glow-card.visible,
+  .biz-tag.visible {
+    animation: none !important;
+  }
+  /* Sin punto guía animado: los nodos del timeline quedan encendidos */
+  .tl-node {
+    background: var(--electric);
+    border-color: #AFC6FF;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  #comet { display: none; }
+  #light-svg .trail-halo,
+  #light-svg .trail-mid,
+  #light-svg .trail-core {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 0.35;
+  }
+  #closing-line .w { opacity: 1; transition: none; }
+  .tw-cursor { display: none; animation: none; }
+  .points_wrapper .point { display: none; animation: none; }
+  .btn-primary .icon { animation: none; }
+  .btn-primary:hover .icon { transform: none; }
+  .btn-primary:hover .icon path { animation: none; stroke-dasharray: none; }
+  .btn-primary, .btn-primary .btn-label { transition: box-shadow 0.3s ease; }
+}

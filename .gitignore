@@ -1,0 +1,13 @@
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Tooling local
+.claude/
+.vercel/
+
+# Dependencias / builds (por si se agregan en el futuro)
+node_modules/
+dist/
+.env
+.env.*
