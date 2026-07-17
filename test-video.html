@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Test — video del anillo</title>
+  <style>
+    body { background: #080B1A; color: #fff; font: 16px -apple-system, system-ui, sans-serif; padding: 16px; margin: 0; }
+    h2 { font-size: 18px; }
+    video { width: 100%; border-radius: 12px; display: block; }
+    #diag { background: #10162e; border: 1px solid #2a3354; border-radius: 12px; padding: 14px 16px; margin-top: 16px; line-height: 1.8; font-size: 14px; }
+    .ok  { color: #7DA2FF; font-weight: 600; }
+    .bad { color: #ff8f8f; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h2>Prueba: video ultra-básico (loop nativo, sin JavaScript custom)</h2>
+  <video id="v" autoplay muted loop playsinline webkit-playsinline
+         src="assets/hero-mobile.mp4" poster="assets/hero-poster.jpg"></video>
+  <div id="diag">Cargando diagnóstico…</div>
+
+  <script>
+    var v = document.getElementById('v');
+    var d = document.getElementById('diag');
+    var rows = [];
+    function paint() { d.innerHTML = rows.join('<br>'); }
+
+    var rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    rows.push('1. "Reducir Movimiento" del sistema: ' +
+      (rm ? '<span class="bad">ACTIVO — causa probable de todo lo estático</span>'
+          : '<span class="ok">inactivo</span>'));
+
+    v.addEventListener('error', function () {
+      rows.push('<span class="bad">ERROR de video (código ' + (v.error && v.error.code) + ')</span>');
+      paint();
+    });
+
+    var p = v.play();
+    if (p !== undefined) {
+      p.then(function () {
+        rows.push('2. play(): <span class="ok">aceptado por el navegador</span>');
+        paint();
+      }).catch(function (e) {
+        rows.push('2. play(): <span class="bad">BLOQUEADO (' + e.name + ')</span> — típico de Low Power Mode. Toca la pantalla y mira si arranca.');
+        paint();
+        document.addEventListener('touchstart', function () { v.play(); }, { once: true });
+      });
+    }
+
+    var t0 = null;
+    setTimeout(function () { t0 = v.currentTime; }, 1000);
+    setTimeout(function () {
+      var moved = t0 !== null && Math.abs(v.currentTime - t0) > 0.1;
+      rows.push('3. ¿El video avanza solo?: ' +
+        (moved ? '<span class="ok">SÍ (' + t0.toFixed(1) + 's → ' + v.currentTime.toFixed(1) + 's)</span>'
+               : '<span class="bad">NO — congelado en ' + v.currentTime.toFixed(1) + 's</span>'));
+      rows.push('4. readyState: ' + v.readyState + ' · paused: ' + v.paused);
+      paint();
+    }, 3500);
+    paint();
+  </script>
+</body>
+</html>

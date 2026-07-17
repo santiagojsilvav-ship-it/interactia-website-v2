@@ -39,12 +39,11 @@
     heroVideo.muted = true;
     heroVideo.playsInline = true;
 
-    if (prefersReducedMotion) {
-      // Sin ping-pong: pausado en el primer frame (o el poster)
-      heroVideo.autoplay = false;
-      heroVideo.pause();
-      heroVideo.currentTime = 0;
-    } else {
+    // El controlador corre SIEMPRE — también bajo prefers-reduced-motion.
+    // Decisión de producto: el anillo ES el producto, y muchos iPhone
+    // tienen "Reducir Movimiento" activo; con el gate el hero se veía
+    // muerto para esos usuarios.
+    {
       let direction = 1;
       let lastTimestamp = null;
       let accumulated = 0; // acumulador: seeks a ~30fps, suave y sin jitter en iOS
@@ -158,7 +157,7 @@
      TYPEWRITER en el H1: "estás" → "puedes" → "quieres" en loop
      ------------------------------------------------------------ */
   const twTarget = document.getElementById('typewriter');
-  if (twTarget && !prefersReducedMotion) {
+  if (twTarget) { // corre también bajo reduced-motion (decisión de producto)
     const WORDS = ['estás', 'puedes', 'quieres'];
     const TYPE_MS = 120;
     const DELETE_MS = 55;
@@ -191,7 +190,7 @@
      CONTEO en los números de "Así trabajo contigo" (00 → 0N)
      ------------------------------------------------------------ */
   const stepNums = Array.from(document.querySelectorAll('.step-num'));
-  if (stepNums.length && !prefersReducedMotion) {
+  if (stepNums.length) { // corre también bajo reduced-motion
     const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
     function countUp(el) {
@@ -218,7 +217,7 @@
           }
         });
       },
-      { threshold: 0.4 }
+      { threshold: 0.25 } // laxo: en pantallas verticales angostas 0.4+ puede no disparar
     );
     stepNums.forEach((el) => countObserver.observe(el));
   }
@@ -228,7 +227,7 @@
      (sin cursor; ~0.6-0.8s por párrafo; solo la primera vez)
      ------------------------------------------------------------ */
   const stepParas = Array.from(document.querySelectorAll('.tl-step .tl-content p'));
-  if (stepParas.length && !prefersReducedMotion) {
+  if (stepParas.length) { // corre también bajo reduced-motion
     stepParas.forEach((p) => {
       p.dataset.fullText = p.textContent.trim().replace(/\s+/g, ' ');
       // Reservar la altura final para que la página no salte al escribir
@@ -251,7 +250,7 @@
           }, 14);
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.25 } // laxo para layouts verticales de móvil
     );
     stepParas.forEach((p) => typeObserver.observe(p));
   }
@@ -586,7 +585,7 @@
     // tiene la ciudad opaca encima de esta capa y taparía el punto),
     // a la altura del H2 de "Lo que puedo hacer por tu negocio" —
     // visible al cargar si la sección asoma al final del viewport.
-    let startX = w * 0.55;
+    let startX = isMobile ? w * 0.5 : w * 0.55;
     let startY = firstTop + 10;
     if (titles.length) {
       const t0 = titles[0].getBoundingClientRect();
@@ -603,7 +602,13 @@
 
     let meander = 1; // alterna el lado del serpenteo central
     titles.forEach((el, i) => {
-      const r = el.getBoundingClientRect();
+      // Caja del TEXTO real (no la del elemento block, que ocupa todo el
+      // ancho del contenedor y en móvil hacía creer que no había espacio
+      // lateral, mandando todos los esquives fuera del canvas)
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      let r = range.getBoundingClientRect();
+      if (!r || r.width === 0) r = el.getBoundingClientRect();
       const top = r.top + getScrollY();
       const bottom = top + r.height;
 
@@ -657,7 +662,10 @@
         ? titles[i + 1].getBoundingClientRect().top + getScrollY()
         : lastBottom;
       if (nextTop - bottom > 420) {
-        push(w * (meander > 0 ? 0.63 : 0.37), (bottom + nextTop) / 2);
+        // Móvil: serpenteo más centrado (las tarjetas difuminan la línea
+        // con su backdrop-filter, no hace falta irse tanto al borde)
+        const mx = isMobile ? 0.56 : 0.63;
+        push(w * (meander > 0 ? mx : 1 - mx), (bottom + nextTop) / 2);
         meander *= -1;
       }
     });

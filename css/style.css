@@ -1044,11 +1044,6 @@ section[id] { scroll-margin-top: 84px; }
   .biz-tag.visible {
     animation: none !important;
   }
-  /* Sin punto guía animado: los nodos del timeline quedan encendidos */
-  .tl-node {
-    background: var(--electric);
-    border-color: #AFC6FF;
-  }
   .reveal {
     opacity: 1;
     transform: none;
@@ -1058,10 +1053,9 @@ section[id] { scroll-margin-top: 84px; }
      usuario (movimiento iniciado por él, no automático) — solo se
      apagan las animaciones autónomas. */
   #closing-line .w { opacity: 1; transition: none; }
-  .tw-cursor { display: none; animation: none; }
-  .points_wrapper .point { display: none; animation: none; }
-  .btn-primary .icon { animation: none; }
-  .btn-primary:hover .icon { transform: none; }
-  .btn-primary:hover .icon path { animation: none; stroke-dasharray: none; }
-  .btn-primary, .btn-primary .btn-label { transition: box-shadow 0.3s ease; }
+  /* Partículas, cursor del typewriter y flecha se mantienen también
+     bajo reduced-motion (decisión de producto: paridad desktop/móvil
+     — muchos iPhone traen "Reducir Movimiento" activo de fábrica y el
+     sitio se veía muerto). Solo se apagan los loops decorativos de
+     arriba (breathing, flotación, puntos de escritura). */
 }
