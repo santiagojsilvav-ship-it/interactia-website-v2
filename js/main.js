@@ -7,6 +7,10 @@
   const prefersReducedMotion =
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Posición de scroll unificada (iOS Safari incluido)
+  const getScrollY = () =>
+    window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+
   /* ------------------------------------------------------------
      Íconos Lucide
      ------------------------------------------------------------ */
@@ -31,6 +35,10 @@
       heroVideo.src = want;
     }
 
+    // Refuerzo explícito de los atributos críticos para iOS
+    heroVideo.muted = true;
+    heroVideo.playsInline = true;
+
     if (prefersReducedMotion) {
       // Sin ping-pong: pausado en el primer frame (o el poster)
       heroVideo.autoplay = false;
@@ -41,6 +49,8 @@
       let lastTimestamp = null;
       let accumulated = 0; // acumulador: seeks a ~30fps, suave y sin jitter en iOS
       let rafId = null;
+      let booted = false;  // el loop ya arrancó al menos una vez
+      let inView = true;   // lo mantiene actualizado el IntersectionObserver
       const EDGE = 0.05; // margen en los extremos
       const SEEK_INTERVAL = 1 / 30;
 
@@ -70,40 +80,77 @@
         rafId = requestAnimationFrame(step);
       }
 
-      function startPingPong() {
-        heroVideo.pause(); // el tiempo lo maneja el rAF, no la reproducción nativa
+      function stopLoop() {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        rafId = null;
         lastTimestamp = null;
-        accumulated = 0;
-        if (rafId === null) rafId = requestAnimationFrame(step);
       }
 
-      if (heroVideo.readyState >= 2) {
-        startPingPong();
+      // Arranque/reanudación LIMPIA: cancela cualquier rAF previo,
+      // resetea el timestamp y relanza. Segura de llamar mil veces.
+      function ensureRunning() {
+        if (!booted || !inView || document.visibilityState !== 'visible') return;
+        stopLoop();
+        rafId = requestAnimationFrame(step);
+      }
+
+      // Warm-up del decoder: iOS no pinta frames al hacer seek si el
+      // video nunca reprodujo. play() explícito con fallback a primera
+      // interacción del usuario (Low Power Mode bloquea autoplay).
+      function warmUp() {
+        const playPromise = heroVideo.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.warn('Autoplay bloqueado por navegador, esperando interacción del usuario', error);
+            document.addEventListener('touchstart', () => heroVideo.play().catch(() => {}), { once: true });
+            document.addEventListener('click', () => heroVideo.play().catch(() => {}), { once: true });
+          });
+        }
+      }
+
+      // En cuanto el video de verdad reproduce, el rAF toma el control
+      // (pausamos: el tiempo lo maneja el ping-pong, no el playback)
+      heroVideo.addEventListener('playing', () => {
+        heroVideo.pause();
+        booted = true;
+        ensureRunning();
+      });
+
+      // Esperar HAVE_FUTURE_DATA (>=3): en iOS, >=2 es insuficiente
+      if (heroVideo.readyState >= 3) {
+        warmUp();
       } else {
-        heroVideo.addEventListener('loadeddata', startPingPong, { once: true });
+        heroVideo.addEventListener('canplay', warmUp, { once: true });
       }
 
-      // Pausar el bucle fuera del viewport y REANUDARLO al volver.
-      // Sin condición de readyState: al estar fuera un rato el navegador
-      // suspende la decodificación (readyState cae a 1) y con ese gate
-      // la animación nunca reanudaba al subir de vuelta al hero.
+      // Viewport: pausar fuera, reanudar al volver
       new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              if (rafId === null) {
-                lastTimestamp = null; // resetear para evitar salto grande
-                rafId = requestAnimationFrame(step);
-              }
-            } else if (rafId !== null) {
-              cancelAnimationFrame(rafId);
-              rafId = null;
-              lastTimestamp = null;
-            }
+            inView = entry.isIntersecting;
+            if (inView) ensureRunning();
+            else stopLoop();
           });
         },
         { threshold: 0.1 }
       ).observe(heroVideo);
+
+      // Ciclo de vida de pestaña/ventana: en TODOS estos eventos se
+      // re-dispara limpiamente (el freeze clásico era volver de una
+      // pestaña oculta con el pipeline de video suspendido)
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          warmUp(); // re-inicia el pipeline de decodificación suspendido
+          ensureRunning();
+        } else {
+          stopLoop();
+        }
+      });
+      window.addEventListener('focus', ensureRunning);
+      window.addEventListener('pageshow', () => {
+        warmUp();
+        ensureRunning();
+      });
     }
   }
 
@@ -217,7 +264,7 @@
   const mobileMenu = document.getElementById('mobile-menu');
 
   function updateNav() {
-    nav.classList.toggle('scrolled', window.scrollY > 24);
+    nav.classList.toggle('scrolled', getScrollY() > 24);
   }
   updateNav();
 
@@ -484,6 +531,7 @@
   let pathLength = 0;
   let samples = []; // [{ len, x, y }] — tabla para buscar la punta por posición Y
   let nodeMarks = []; // nodos del timeline: se encienden al pasar la punta
+  let constZone = null; // banda vertical de la constelación (red energizable)
   let currentLen = 0;
   let targetLen = 0;
   let rafId = null;
@@ -527,9 +575,9 @@
     if (!stops.length) return;
 
     const firstRect = stops[0].getBoundingClientRect();
-    const firstTop = firstRect.top + window.scrollY;
+    const firstTop = firstRect.top + getScrollY();
     const lastRect = stops[stops.length - 1].getBoundingClientRect();
-    const lastBottom = lastRect.top + window.scrollY + lastRect.height;
+    const lastBottom = lastRect.top + getScrollY() + lastRect.height;
 
     const titles = Array.from(document.querySelectorAll('main section h2, #closing-line'));
     const PAD = 60; // margen vertical de seguridad alrededor de cada título
@@ -542,7 +590,7 @@
     let startY = firstTop + 10;
     if (titles.length) {
       const t0 = titles[0].getBoundingClientRect();
-      startY = Math.max(t0.top + window.scrollY - 90, firstTop + 10);
+      startY = Math.max(t0.top + getScrollY() - 90, firstTop + 10);
     }
     const pts = [{ x: startX, y: startY }];
     let lastY = pts[0].y;
@@ -556,7 +604,7 @@
     let meander = 1; // alterna el lado del serpenteo central
     titles.forEach((el, i) => {
       const r = el.getBoundingClientRect();
-      const top = r.top + window.scrollY;
+      const top = r.top + getScrollY();
       const bottom = top + r.height;
 
       // Lado con más aire respecto al título (izq. o der.), a mitad
@@ -588,13 +636,13 @@
         if (nodes.length) {
           const f = nodes[0].getBoundingClientRect();
           const nx = f.left + f.width / 2;
-          const fy = f.top + window.scrollY;
+          const fy = f.top + getScrollY();
           // El tramo recto termina DESPUÉS del texto completo del último
           // paso (no en su nodo): en móvil la salida en diagonal cruzaba
           // el texto del paso 04.
           const lastStep = sec.querySelector('.tl-step:last-of-type');
           const sb = lastStep.getBoundingClientRect();
-          const exitY = sb.top + window.scrollY + sb.height + 15;
+          const exitY = sb.top + getScrollY() + sb.height + 15;
           // Entrada 90px por encima del primer nodo: la línea ya viene
           // vertical y recta antes de acercarse al número "01" (el
           // barrido horizontal de la S ocurre lejos, a media distancia
@@ -606,7 +654,7 @@
 
       // …y vuelve a serpentear por el centro hasta el próximo título
       const nextTop = i < titles.length - 1
-        ? titles[i + 1].getBoundingClientRect().top + window.scrollY
+        ? titles[i + 1].getBoundingClientRect().top + getScrollY()
         : lastBottom;
       if (nextTop - bottom > 420) {
         push(w * (meander > 0 ? 0.63 : 0.37), (bottom + nextTop) / 2);
@@ -635,11 +683,22 @@
     // Posiciones de los nodos del timeline (para encenderlos con la punta)
     nodeMarks = Array.from(document.querySelectorAll('.tl-node')).map((el) => {
       const r = el.getBoundingClientRect();
-      return { el, y: r.top + window.scrollY + r.height / 2 };
+      return { el, y: r.top + getScrollY() + r.height / 2 };
     });
 
-    if (prefersReducedMotion) return; // el CSS deja el trazo completo y estático
+    // Zona de la constelación: la red se energiza cuando la punta pasa
+    const constEl = document.getElementById('constellation');
+    if (constEl) {
+      const cr = constEl.getBoundingClientRect();
+      constZone = {
+        el: constEl,
+        top: cr.top + getScrollY() - 120,
+        bottom: cr.top + getScrollY() + cr.height + 120,
+      };
+    }
 
+    // El dibujado por scroll corre SIEMPRE (también con reduced-motion:
+    // lo controla el dedo/rueda del usuario, no es animación autónoma)
     trails.forEach((p) => {
       p.style.strokeDasharray = `${pathLength}`;
       p.style.strokeDashoffset = `${pathLength - currentLen}`;
@@ -647,8 +706,9 @@
   }
 
   // La punta de la luz debe estar a ~62% de la altura del viewport actual
+  // (innerHeight es dinámico: sigue a la barra de URL de Safari iOS)
   function computeTargetLen() {
-    const tipDocY = window.scrollY + window.innerHeight * 0.62;
+    const tipDocY = getScrollY() + window.innerHeight * 0.62;
     // Búsqueda binaria sobre las muestras (Y crece casi monotónicamente)
     let lo = 0;
     let hi = samples.length - 1;
@@ -692,6 +752,14 @@
     for (const n of nodeMarks) {
       n.el.classList.toggle('node-lit', tip.y >= n.y - 8);
     }
+
+    // Red de la constelación: energizada mientras la punta la recorre
+    if (constZone) {
+      constZone.el.classList.toggle(
+        'net-lit',
+        tip.y >= constZone.top && tip.y <= constZone.bottom
+      );
+    }
   }
 
   function wake() {
@@ -705,20 +773,16 @@
   if (lightSvg && trails.length) {
     buildLightPath();
 
-    if (!prefersReducedMotion) {
-      window.addEventListener(
-        'scroll',
-        () => {
-          updateNav();
-          wake();
-        },
-        { passive: true }
-      );
+    // Scroll + touchmove (Safari iOS a veces solo actualiza fluido con
+    // el touchmove explícito mientras el dedo arrastra). Ambos passive;
+    // el trabajo real (dashoffset) ocurre dentro del rAF de tick().
+    const handleScroll = () => {
+      updateNav();
       wake();
-    } else {
-      window.addEventListener('scroll', updateNav, { passive: true });
-      comet.style.display = 'none';
-    }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('touchmove', handleScroll, { passive: true });
+    wake();
 
     // Reconstruir si cambia el layout (resize, acordeón abierto, fuentes)
     let rebuildTimer = null;
@@ -726,7 +790,7 @@
       clearTimeout(rebuildTimer);
       rebuildTimer = setTimeout(() => {
         buildLightPath();
-        if (!prefersReducedMotion) wake();
+        wake();
       }, 180);
     }
     window.addEventListener('resize', scheduleRebuild);
