@@ -243,11 +243,13 @@
           const p = entry.target;
           const full = p.dataset.fullText;
           let i = 0;
+          // ~30ms por carácter: escritura perceptible sin hacer esperar
+          // (un párrafo de 70-90 caracteres completa en ~2-2.5s)
           const iv = setInterval(() => {
-            i = Math.min(i + 2, full.length); // 2 caracteres por tick
+            i = Math.min(i + 1, full.length);
             p.textContent = full.slice(0, i);
             if (i >= full.length) clearInterval(iv);
-          }, 14);
+          }, 30);
         });
       },
       { threshold: 0.25 } // laxo para layouts verticales de móvil
@@ -385,7 +387,7 @@
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 } // laxo: en móvil la frase ocupa varias líneas y 0.5 tardaba
     );
     lineObserver.observe(closingLine);
   }
@@ -423,14 +425,18 @@
       EDGES.forEach(([a, b]) => {
         const ra = constCards[a].getBoundingClientRect();
         const rb = constCards[b].getBoundingClientRect();
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', ra.left - cr.left + ra.width / 2);
-        line.setAttribute('y1', ra.top - cr.top + ra.height / 2);
-        line.setAttribute('x2', rb.left - cr.left + rb.width / 2);
-        line.setAttribute('y2', rb.top - cr.top + rb.height / 2);
-        line.dataset.a = a;
-        line.dataset.b = b;
-        linesSvg.appendChild(line);
+        // Dos capas por conexión: línea base estática + pulso viajero
+        ['c-base', 'c-pulse'].forEach((cls) => {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', ra.left - cr.left + ra.width / 2);
+          line.setAttribute('y1', ra.top - cr.top + ra.height / 2);
+          line.setAttribute('x2', rb.left - cr.left + rb.width / 2);
+          line.setAttribute('y2', rb.top - cr.top + rb.height / 2);
+          line.setAttribute('class', cls);
+          line.dataset.a = a;
+          line.dataset.b = b;
+          linesSvg.appendChild(line);
+        });
       });
     }
 
@@ -531,6 +537,7 @@
   let samples = []; // [{ len, x, y }] — tabla para buscar la punta por posición Y
   let nodeMarks = []; // nodos del timeline: se encienden al pasar la punta
   let constZone = null; // banda vertical de la constelación (red energizable)
+  let cardMarks = []; // tarjetas del stack: "seleccionadas" al pasar la punta (móvil)
   let currentLen = 0;
   let targetLen = 0;
   let rafId = null;
@@ -657,6 +664,18 @@
         }
       }
 
+      // En móvil, la línea baja CENTRADA detrás de las tarjetas apiladas
+      // del stack (el card-lit las "selecciona" una a una a su paso)
+      if (isMobile && sec && sec.id === 'stack') {
+        const constEl2 = document.getElementById('constellation');
+        if (constEl2) {
+          const cr2 = constEl2.getBoundingClientRect();
+          const cTop = cr2.top + getScrollY();
+          push(w * 0.5, cTop - 40);
+          push(w * 0.5, cTop + cr2.height + 20);
+        }
+      }
+
       // …y vuelve a serpentear por el centro hasta el próximo título
       const nextTop = i < titles.length - 1
         ? titles[i + 1].getBoundingClientRect().top + getScrollY()
@@ -704,6 +723,16 @@
         bottom: cr.top + getScrollY() + cr.height + 120,
       };
     }
+
+    // Bandas de cada tarjeta del stack (selección individual en móvil)
+    cardMarks = Array.from(document.querySelectorAll('.const-card')).map((el) => {
+      const r = el.getBoundingClientRect();
+      return {
+        el,
+        top: r.top + getScrollY() - 30,
+        bottom: r.top + getScrollY() + r.height + 30,
+      };
+    });
 
     // El dibujado por scroll corre SIEMPRE (también con reduced-motion:
     // lo controla el dedo/rueda del usuario, no es animación autónoma)
@@ -767,6 +796,11 @@
         'net-lit',
         tip.y >= constZone.top && tip.y <= constZone.bottom
       );
+    }
+
+    // Tarjetas del stack: "seleccionadas" una a una al paso de la punta
+    for (const c of cardMarks) {
+      c.el.classList.toggle('card-lit', tip.y >= c.top && tip.y <= c.bottom);
     }
   }
 

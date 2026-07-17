@@ -823,18 +823,55 @@ section[id] { scroll-margin-top: 84px; }
     height: 100%;
     pointer-events: none;
   }
-  .const-lines line {
-    stroke: rgba(61, 111, 255, 0.16);
-    stroke-width: 1;
+  /* Red viva: cada conexión son dos capas — línea base + pulso viajero
+     (un segmento brillante recorre el trazo en loop, cada línea con su
+     propio ritmo). El estado net-lit es un boost sobre este reposo. */
+  .const-lines line.c-base {
+    stroke: rgba(61, 111, 255, 0.22);
+    stroke-width: 1.75;
     transition: stroke 0.5s ease;
   }
-  /* La red se "energiza" cuando el punto guía del scroll llega a la
-     sección: mismo lenguaje visual que el camino de luz */
+  .const-lines line.c-pulse {
+    stroke: rgba(150, 185, 255, 0.75);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 14 300;
+    animation: constFlow linear infinite;
+  }
+  /* Los pulsos son los hijos pares (base, pulso, base, pulso…) */
+  .const-lines line:nth-child(2)  { animation-duration: 3.6s; }
+  .const-lines line:nth-child(4)  { animation-duration: 5s;   animation-delay: 0.9s; }
+  .const-lines line:nth-child(6)  { animation-duration: 4.2s; animation-delay: 1.7s; }
+  .const-lines line:nth-child(8)  { animation-duration: 5.6s; animation-delay: 0.4s; }
+  .const-lines line:nth-child(10) { animation-duration: 4.6s; animation-delay: 2.3s; }
+
   #constellation.net-lit .const-lines {
     filter: drop-shadow(0 0 6px rgba(61, 111, 255, 0.45));
   }
-  #constellation.net-lit .const-lines line { stroke: rgba(61, 111, 255, 0.42); }
-  .const-lines line.active { stroke: rgba(61, 111, 255, 0.65) !important; }
+  #constellation.net-lit .const-lines line.c-base {
+    stroke: rgba(61, 111, 255, 0.45);
+    stroke-width: 2.2;
+  }
+  #constellation.net-lit .const-lines line.c-pulse { stroke: rgba(195, 215, 255, 0.95); }
+  .const-lines line.c-base.active { stroke: rgba(61, 111, 255, 0.7) !important; }
+}
+@keyframes constFlow {
+  to { stroke-dashoffset: -314; } /* 14 + 300: loop perfecto del pulso */
+}
+
+/* Móvil: "selección" fuerte de cada tarjeta cuando la línea pasa detrás
+   (más intensa que el hover de desktop: momento claro y satisfactorio) */
+.const-logo { transition: filter 0.35s ease-out; }
+@media (max-width: 1023px) {
+  .const-card.card-lit {
+    animation: none; /* pausa el breathing: manda el scale de selección */
+    transform: scale(1.06);
+    border-color: rgba(165, 195, 255, 0.9);
+    box-shadow: 0 0 48px rgba(61, 111, 255, 0.55),
+                0 12px 40px -12px rgba(61, 111, 255, 0.5),
+                0 0 0 1px rgba(61, 111, 255, 0.35) inset;
+  }
+  .const-card.card-lit .const-logo { filter: brightness(1.35); }
 }
 .const-lines { transition: filter 0.6s ease; }
 
@@ -1035,6 +1072,48 @@ section[id] { scroll-margin-top: 84px; }
 }
 
 /* ============================================================
+   BOTÓN FLOTANTE DE WHATSAPP — vidrio azul de marca
+   ============================================================ */
+#wa-float {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(61, 111, 255, 0.22);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(150, 185, 255, 0.4);
+  box-shadow: 0 0 24px rgba(61, 111, 255, 0.35),
+              0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  animation: waBreath 2.8s ease-in-out infinite;
+  transition: box-shadow 0.35s ease-out, transform 0.35s ease-out,
+              background 0.35s ease-out;
+}
+#wa-float svg { width: 28px; height: 28px; }
+#wa-float:hover {
+  animation: none;
+  transform: scale(1.08);
+  background: rgba(61, 111, 255, 0.32);
+  box-shadow: 0 0 42px rgba(61, 111, 255, 0.55),
+              0 10px 30px -8px rgba(0, 0, 0, 0.5);
+}
+@keyframes waBreath {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+@media (max-width: 767px) {
+  #wa-float { width: 52px; height: 52px; right: 20px; bottom: 20px; }
+  #wa-float svg { width: 24px; height: 24px; }
+}
+
+/* ============================================================
    ACCESIBILIDAD — reduced motion
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
@@ -1052,8 +1131,8 @@ section[id] { scroll-margin-top: 84px; }
   /* La línea de luz se mantiene: su dibujado lo controla el scroll del
      usuario (movimiento iniciado por él, no automático) — solo se
      apagan las animaciones autónomas. */
-  #closing-line .w { opacity: 1; transition: none; }
-  /* Partículas, cursor del typewriter y flecha se mantienen también
+  #wa-float { animation: none; } /* estático pero funcional */
+  /* Partículas, cursor del typewriter, flecha y frase de cierre se mantienen también
      bajo reduced-motion (decisión de producto: paridad desktop/móvil
      — muchos iPhone traen "Reducir Movimiento" activo de fábrica y el
      sitio se veía muerto). Solo se apagan los loops decorativos de
