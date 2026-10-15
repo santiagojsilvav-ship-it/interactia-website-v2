@@ -91,6 +91,7 @@
 
       <div class="flex items-center gap-3">
         <a href="https://cal.com/santiago-silva-lvftf3/30min" target="_blank" rel="noopener"
+           data-cal-link="santiago-silva-lvftf3/30min" data-cal-config='{"layout":"month_view"}'
            class="magnetic btn-primary btn-sm hidden md:inline-flex">
           <div class="points_wrapper" aria-hidden="true">
             <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
@@ -121,6 +122,7 @@
       <a href="#para-quien" class="menu-item font-heading text-2xl text-white">Para quién</a>
       <a href="#faq" class="menu-item font-heading text-2xl text-white">FAQ</a>
       <a href="https://cal.com/santiago-silva-lvftf3/30min" target="_blank" rel="noopener"
+         data-cal-link="santiago-silva-lvftf3/30min" data-cal-config='{"layout":"month_view"}'
          class="menu-item btn-primary mt-4">
         <div class="points_wrapper" aria-hidden="true">
           <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
@@ -181,6 +183,7 @@
 
             <div class="reveal mt-8">
               <a href="https://cal.com/santiago-silva-lvftf3/30min" target="_blank" rel="noopener"
+                 data-cal-link="santiago-silva-lvftf3/30min" data-cal-config='{"layout":"month_view"}'
                  class="magnetic btn-primary">
                 <div class="points_wrapper" aria-hidden="true">
                   <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
@@ -626,6 +629,7 @@
         </p>
         <div class="reveal mt-9">
           <a href="https://cal.com/santiago-silva-lvftf3/30min" target="_blank" rel="noopener"
+             data-cal-link="santiago-silva-lvftf3/30min" data-cal-config='{"layout":"month_view"}'
              class="magnetic btn-primary">
             <div class="points_wrapper" aria-hidden="true">
               <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
@@ -678,13 +682,44 @@
 
   <script src="js/main.js"></script>
 
-  <!-- Meta Pixel: conversión "Lead" al hacer clic en "Habla conmigo" (Cal.com).
-       Solo dispara el evento; no altera el estilo, el texto ni el destino del botón. -->
+  <!-- Cal.com: el calendario abre como pop-up sobre la página (embed oficial).
+       El href de cada botón queda como respaldo si el embed no carga. -->
+  <script type="text/javascript">
+    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+    // Sin namespace: los eventos se escuchan con Cal("on", ...), no con Cal.ns.xxx("on", ...).
+    Cal("init", { origin: "https://app.cal.com" });
+    // Precarga el calendario en segundo plano cuando la página ya cargó, para que el pop-up
+    // abra al instante (mientras Cal.com muestra su spinner, la X no responde).
+    window.addEventListener('load', function () {
+      Cal("preload", { calLink: "santiago-silva-lvftf3/30min", type: "modal", options: { layout: "month_view" } });
+    });
+  </script>
+
+  <!-- Meta Pixel: "ClickAgendar" al tocar "Habla conmigo"; "Lead" solo al confirmar la reserva. -->
   <script>
+    window.__leadSent = false;
+    function sendLead() {
+      if (window.__leadSent || typeof fbq !== 'function') return;
+      window.__leadSent = true;
+      fbq('track', 'Lead');
+    }
+    Cal("on", { action: "bookingSuccessfulV2", callback: sendLead });
+    Cal("on", { action: "bookingSuccessful", callback: sendLead });
+
+    // Si el calendario no carga dentro del pop-up, se abre Cal.com directamente.
+    Cal("on", { action: "linkFailed", callback: function () {
+      window.location.href = 'https://cal.com/santiago-silva-lvftf3/30min';
+    } });
+
     document.addEventListener('click', function (e) {
       var t = e.target;
       if (!t || typeof t.closest !== 'function') return;
-      if (t.closest('a[href*="cal.com"]') && typeof fbq === 'function') fbq('track', 'Lead');
+      var btn = t.closest('a[data-cal-link]');
+      if (!btn) return;
+      if (typeof fbq === 'function') fbq('trackCustom', 'ClickAgendar');
+      // embed.js abre el pop-up pero no cancela el enlace; si cargó, evitamos la pestaña nueva.
+      // Si no cargó (Cal.instance no existe), el href abre Cal.com como respaldo.
+      if (window.Cal && window.Cal.instance) e.preventDefault();
     }, true);
   </script>
 </body>
